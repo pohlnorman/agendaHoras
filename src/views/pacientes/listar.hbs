@@ -1,0 +1,32 @@
+<h2>Pacientes</h2>
+
+<a href="/pacientes/crear" class="btn btn-success mb-3">Nuevo Paciente</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Rut</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Email ✔</th>
+            <th>SMS ✔</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each pacientes}}
+        <tr>
+            <td>{{formatRut rut}}</td>
+            <td>{{nombre}}</td>
+            <td>{{this.email}}</td>
+            <td>{{this.telefono}}</td>
+            <td>{{#if this.recordatorio_email}}Sí{{else}}No{{/if}}</td>
+            <td>{{#if this.recordatorio_sms}}Sí{{else}}No{{/if}}</td>
+            <td>
+                <a href="/pacientes/editar/{{this.id}}" class="btn btn-warning btn-sm">Editar</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

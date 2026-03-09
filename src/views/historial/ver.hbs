@@ -1,0 +1,85 @@
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-clock-history"></i> Historial Clínico del Paciente</h2>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <label class="form-label font-weight-bold">Buscar Paciente (Nombre o RUT)</label>
+            <div class="position-relative">
+                <input type="text" id="buscadorPaciente" class="form-control form-control-lg" 
+                       placeholder="Escriba para buscar..." autocomplete="off">
+                <ul id="listaResultados" class="list-group position-absolute w-100 shadow d-none" style="z-index: 1000;"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="contenedorHistorial" class="d-none">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" id="nombrePacienteTitulo">Citas de: </h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Observación</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCitasBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const buscador = document.getElementById('buscadorPaciente');
+const lista = document.getElementById('listaResultados');
+const contenedor = document.getElementById('contenedorHistorial');
+
+buscador.addEventListener('input', async (e) => {
+    const query = e.target.value;
+    if (query.length < 2) return lista.classList.add('d-none');
+
+    const res = await fetch(`/pacientes/sugerencias?q=${query}`); // Reutilizamos tu ruta anterior
+    const pacientes = await res.json();
+
+    if (pacientes.length > 0) {
+        lista.innerHTML = pacientes.map(p => `
+            <li class="list-group-item list-group-item-action cursor-pointer" 
+                onclick="cargarHistorial('${p.id}', '${p.nombre}')">
+                <strong>${p.nombre}</strong> <small class="text-muted">(${p.rut})</small>
+            </li>
+        `).join('');
+        lista.classList.remove('d-none');
+    }
+});
+
+async function cargarHistorial(id, nombre) {
+    buscador.value = nombre;
+    lista.classList.add('d-none');
+    
+    const res = await fetch(`/historial/paciente/${id}`);
+    const citas = await res.json();
+
+    document.getElementById('nombrePacienteTitulo').innerText = `Citas de: ${nombre}`;
+    const tbody = document.getElementById('tablaCitasBody');
+    
+    if (citas.length > 0) {
+        tbody.innerHTML = citas.map(c => `
+            <tr>
+                <td><strong>${new Date(c.fecha).toLocaleDateString()}</strong></td>
+                <td>${c.hora}</td>
+                <td>${c.observacion || '<span class="text-muted">Sin observación</span>'}</td>
+                <td><span class="badge bg-success">${c.estado || 'Atendido'}</span></td>
+            </tr>
+        `).join('');
+    } else {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Este paciente no tiene citas registradas.</td></tr>';
+    }
+    contenedor.classList.remove('d-none');
+}
+</script>

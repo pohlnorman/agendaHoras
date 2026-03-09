@@ -1,0 +1,94 @@
+<div class="container mt-4">
+    <h2>Nueva Cita</h2>
+    <hr>
+
+    <form action="/citas/crear" method="POST">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label">Buscar Paciente (RUT o Nombre)</label>
+                <div class="position-relative">
+                    <input type="text" id="buscadorPaciente" class="form-control" 
+                           placeholder="Escriba RUT o Nombre..." autocomplete="off">
+                    
+                    <ul id="listaResultados" class="list-group position-absolute w-100 shadow-sm d-none" 
+                        style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                    </ul>
+                </div>
+                <input type="hidden" name="pacienteId" id="pacienteId" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" name="fecha" value="{{fechaSeleccionada}}" class="form-control bg-light" readonly required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Hora</label>
+                <input type="time" name="hora" value="{{horaSeleccionada}}" class="form-control bg-light" readonly required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Observación</label>
+            <textarea name="observacion" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="/agenda" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" id="btnGuardar" disabled>Guardar Cita</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const buscador = document.getElementById('buscadorPaciente');
+const lista = document.getElementById('listaResultados');
+const idInput = document.getElementById('pacienteId');
+const btnGuardar = document.getElementById('btnGuardar');
+
+buscador.addEventListener('input', async (e) => {
+    const query = e.target.value;
+    if (query.length < 2) {
+        lista.classList.add('d-none');
+        return;
+    }
+
+    try {
+        const res = await fetch(`/pacientes/sugerencias?q=${query}`);
+        const pacientes = await res.json();
+
+        if (pacientes.length > 0) {
+            lista.innerHTML = pacientes.map(p => `
+                <li class="list-group-item list-group-item-action cursor-pointer" 
+                    onclick="seleccionarPaciente('${p.id}', '${p.nombre}', '${p.rut}')">
+                    <strong>${p.nombre}</strong> <small class="text-muted">(${p.rut})</small>
+                </li>
+            `).join('');
+            lista.classList.remove('d-none');
+        } else {
+            lista.innerHTML = '<li class="list-group-item">No hay coincidencias</li>';
+            lista.classList.remove('d-none');
+        }
+    } catch (err) {
+        console.error("Error buscando:", err);
+    }
+});
+
+function seleccionarPaciente(id, nombre, rut) {
+    buscador.value = `${nombre} (${rut})`;
+    idInput.value = id;
+    lista.classList.add('d-none');
+    btnGuardar.disabled = false; // Habilitar botón al seleccionar
+}
+
+// Cerrar lista si se hace clic fuera
+document.addEventListener('click', (e) => {
+    if (!buscador.contains(e.target)) lista.classList.add('d-none');
+});
+</script>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .list-group-item-action:hover { background-color: #f8f9fa; }
+</style>

@@ -1,0 +1,36 @@
+<h2>Editar Paciente</h2>
+
+<form action="/pacientes/editar/{{paciente.id}}" method="POST">
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control"
+               value="{{paciente.nombre}}" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control"
+               value="{{paciente.email}}">
+    </div>
+
+    <div class="mb-3">
+        <label>Teléfono</label>
+        <input type="text" name="telefono" class="form-control"
+               value="{{paciente.telefono}}">
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="recordatorio_email"
+        {{#if paciente.recordatorio_email}}checked{{/if}}>
+        <label>Email</label>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="recordatorio_sms"
+        {{#if paciente.recordatorio_sms}}checked{{/if}}>
+        <label>SMS</label>
+    </div>
+
+    <button class="btn btn-primary mt-3">Actualizar</button>
+</form>

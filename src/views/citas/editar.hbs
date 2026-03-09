@@ -1,0 +1,39 @@
+<h2>Editar Cita</h2>
+
+<form action="/citas/editar/{{cita.id}}" method="POST">
+
+    <div class="mb-3">
+        <label>Paciente</label>
+        <select name="pacienteId" class="form-select">
+            {{#each pacientes}}
+            <option value="{{this.id}}"
+            {{#if (eq this.id ../cita.pacienteId)}}selected{{/if}}>
+            {{this.nombre}}
+            </option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha</label>
+        <input type="date" name="fecha" class="form-control"
+               value="{{cita.fecha}}" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Hora</label>
+        <input type="time" name="hora" class="form-control"
+               value="{{cita.hora}}" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Estado</label>
+        <select name="estado" class="form-select">
+            <option value="agendada">Agendada</option>
+            <option value="realizada">Realizada</option>
+            <option value="cancelada">Cancelada</option>
+        </select>
+    </div>
+
+    <button class="btn btn-primary">Actualizar</button>
+</form>

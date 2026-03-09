@@ -1,0 +1,30 @@
+<h2>Citas</h2>
+
+<a href="/citas/crear" class="btn btn-success mb-3">Nueva Cita</a>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Paciente</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each citas}}
+        <tr>
+            <td>{{this.Paciente.nombre}}</td>
+            <td>{{this.fecha}}</td>
+            <td>{{this.hora}}</td>
+            <td>{{this.estado}}</td>
+            <td>
+                <a href="/citas/editar/{{this.id}}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="/citas/eliminar/{{this.id}}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('¿Eliminar cita?')">Eliminar</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

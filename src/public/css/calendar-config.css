@@ -1,0 +1,26 @@
+/* Reducir el tamaño de la fuente en móviles para que quepa más texto */
+@media (max-width: 768px) {
+    .fc {
+        font-size: 0.85em; /* Texto un poco más pequeño */
+    }
+
+    /* Ocultar el texto de los botones para ganar espacio, dejar solo iconos */
+    .fc .fc-button {
+        padding: 0.4em 0.5em !important;
+    }
+    
+    /* Hacer que la cabecera del calendario sea más compacta */
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Mejorar el aspecto de los eventos */
+.fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2px;
+}
