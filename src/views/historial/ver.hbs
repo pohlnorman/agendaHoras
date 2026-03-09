@@ -72,7 +72,7 @@ async function cargarHistorial(id, nombre) {
         tbody.innerHTML = citas.map(c => `
             <tr>
                 <td><strong>${new Date(c.fecha).toLocaleDateString()}</strong></td>
-                <td>${c.hora}</td>
+                <td>${c.hora.substring(0, 5)}</td>
                 <td>${c.observacion || '<span class="text-muted">Sin observación</span>'}</td>
                 <td><span class="badge bg-success">${c.estado || 'Atendido'}</span></td>
             </tr>

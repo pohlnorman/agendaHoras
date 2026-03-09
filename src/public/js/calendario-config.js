@@ -33,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // --- CONFIGURACIÓN DE TIEMPOS ---
         slotMinTime: "08:00:00",
         slotMaxTime: "24:00:00",
+        // ✅ Define que cada fila represente 30 minutos (Dibuja la línea de 08:30)
+        slotDuration: '00:20:00',
+        // ✅ Obliga a mostrar la etiqueta de texto en cada fila (08:00, 08:30, 09:00...)
+        slotLabelInterval: '00:40:00',
         
         // ✅ Ajustes de precisión
         height: 'auto',          // El calendario se estira según el contenido, no se comprime
@@ -41,15 +45,22 @@ document.addEventListener('DOMContentLoaded', function() {
         stickyHeaderDates: true, // Mantiene la fecha arriba al hacer scroll
         displayEventEnd: false,
         // ✅ Asegura que el clic sea preciso en los 30 min
-        snapDuration: '00:30:00',
+        snapDuration: '00:40:00',
         allDaySlot: false, // Opcional: quita la fila superior de "todo el día" para ganar espacio
         
         // ✅ SOLUCIÓN AL PROBLEMA DE LOS 60 MINUTOS
         // Esto hace que si el evento no tiene 'end', dure solo 30 min
-        defaultTimedEventDuration: '00:30:00',
+        defaultTimedEventDuration: '00:40:00',
         forceEventDuration: true,
 
-        // ✅ Configura el formato de hora del evento: "10:30" (sin hora de fin)
+        // --- FORMATO DE HORA EN LA COLUMNA IZQUIERDA ---
+        slotLabelFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false // ✅ Formato 24h (ej: 08:00 en lugar de 8 AM)
+        },
+
+        // --- FORMATO DE HORA DENTRO DE LOS EVENTOS ---
         eventTimeFormat: {
             hour: '2-digit',
             minute: '2-digit',
