@@ -4,7 +4,7 @@ import Cita from "./cita.model.js";
 
   const Notificacion =  db.define("Notificacion", {
     tipo: {
-      type: DataTypes.ENUM("email", "sms"),
+      type: DataTypes.ENUM("email", "sms","whatsapp"),
       allowNull: false,
     },
     estado: {

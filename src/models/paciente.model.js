@@ -33,9 +33,13 @@ import { limpiarRut, validarRut } from "../lib/validaRut.js";
     telefono: {
       type: DataTypes.STRING,
     },
-    recordatorio_email: {
+    recordatorio_wsp: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    recordatorio_email: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     recordatorio_sms: {
       type: DataTypes.BOOLEAN,

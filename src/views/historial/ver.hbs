@@ -25,6 +25,7 @@
                             <th>Hora</th>
                             <th>Observación</th>
                             <th>Estado</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaCitasBody">
@@ -75,6 +76,11 @@ async function cargarHistorial(id, nombre) {
                 <td>${c.hora.substring(0, 5)}</td>
                 <td>${c.observacion || '<span class="text-muted">Sin observación</span>'}</td>
                 <td><span class="badge bg-success">${c.estado || 'Atendido'}</span></td>
+                <td class="text-center">
+                    <button class="btn btn-outline-success btn-sm shadow-sm" onclick="enviarWhatsApp('${c.id}')">
+                        <i class="bi bi-whatsapp"></i> Recordar
+                    </button>
+                </td>
             </tr>
         `).join('');
     } else {
@@ -82,4 +88,54 @@ async function cargarHistorial(id, nombre) {
     }
     contenedor.classList.remove('d-none');
 }
+
+// Función para el envío manual de WhatsApp
+async function enviarWhatsApp(citaId) {
+    // Alerta de carga
+    Swal.fire({
+        title: 'Enviando WhatsApp...',
+        didOpen: () => { Swal.showLoading() },
+        allowOutsideClick: false
+    });
+
+    try {
+        const res = await fetch(`/historial/enviar-manual/${citaId}`, {
+            method: 'POST'
+        });
+        const data = await res.json(); // Leemos la respuesta JSON
+        if (res.ok) {
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: 'Mensaje enviado correctamente',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                background: '#25D366',
+                color: '#ffffff'
+            });
+        } else {
+            // ✅ Aquí mostramos el mensaje de "Número no registrado" que enviamos desde el controlador
+            throw new Error(data.message || 'Error al enviar');
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: error.message,
+            confirmButtonColor: '#f8bb86'
+        });
+    }
+}
+
+// Cerrar lista si se hace clic fuera
+document.addEventListener('click', (e) => {
+    if (!buscador.contains(e.target)) lista.classList.add('d-none');
+});
 </script>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .btn-outline-success:hover { color: white !important; }
+</style>

@@ -4,6 +4,9 @@ import exphbs from 'express-handlebars';
 import path,{ dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+import cron from 'node-cron';
+import { enviarRecordatoriosManana } from './src/services/notificacion.service.js';
+
 // IMPORTANTE: Importamos la conexión y los modelos directamente
 import db from './src/config/conecction.js';
 import Notificacion from './src/models/notificacion.model.js';
@@ -45,6 +48,12 @@ app.use(express.json());//Esta línea permite manejar datos en formato JSON.
 app.use((req, res, next) => {
     next();
 })
+
+// Programar para que corra todos los días a las 09:00 AM
+cron.schedule('0 9 * * *', () => {
+    console.log('Iniciando envío de recordatorios diarios...');
+    enviarRecordatoriosManana();
+});
 
 //rutas
 app.get("/", (req, res) => {
