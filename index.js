@@ -18,6 +18,7 @@ import pacienteRoutes from "./src/routes/paciente.route.js";
 import citaRoutes from "./src/routes/cita.route.js";
 import agendaRoutes from './src/routes/agenda.route.js';
 import historialRoutes from './src/routes/historial.route.js'
+import notificacionRoutes from './src/routes/notificaciones.route.js'
 
 import {helpers} from './src/lib/handlebars.js';
 
@@ -50,7 +51,7 @@ app.use((req, res, next) => {
 })
 
 // Programar para que corra todos los días a las 09:00 AM
-cron.schedule('0 9 * * *', () => {
+cron.schedule('0 10 * * *', () => {
     console.log('Iniciando envío de recordatorios diarios...');
     enviarRecordatoriosManana();
 });
@@ -63,6 +64,7 @@ app.use("/pacientes", pacienteRoutes);
 app.use("/citas", citaRoutes);
 app.use('/agenda', agendaRoutes);
 app.use('/historial', historialRoutes);
+app.use('/notificaciones', notificacionRoutes);
 
 //archivos publicos
 app.use(express.static(path.join(__dirname, 'src/public')));
@@ -71,7 +73,7 @@ app.use(express.static(path.join(__dirname, 'src/public')));
 async function main() {
     try {
         // Esto sincroniza TODOS los modelos importados que usen la instancia 'db'
-        await db.sync({ alter: true });
+        await db.sync({ force: true });
         console.log("Base de datos sincronizada correctamente");
 
         app.listen(PORT, () => {

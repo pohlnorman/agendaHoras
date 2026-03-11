@@ -21,7 +21,7 @@ import Cita from "./cita.model.js";
   });
 
     // Definimos las relaciones aquí mismo
-Cita.hasMany(Notificacion, {foreignKey: 'citaId', onDelete: 'CASCADE'});
+Cita.hasMany(Notificacion, {foreignKey: 'citaId', onDelete: 'CASCADE', hooks: true});
 Notificacion.belongsTo(Cita,{foreignKey: 'citaId'})
 
 

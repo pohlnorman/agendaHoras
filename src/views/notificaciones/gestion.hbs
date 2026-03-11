@@ -1,0 +1,178 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-whatsapp text-success"></i> Panel de Notificaciones</h2>
+        <button class="btn btn-primary" onclick="cargarCitas()">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar Citas de Mañana
+        </button>
+        <button id="btnEnviarTodos" class="btn btn-success" onclick="enviarATodos()">
+            <i class="bi bi-send-check"></i> Enviar a todos los pendientes
+        </button>
+    </div>
+
+    <div id="progresoContainer" class="progress mb-3 d-none" style="height: 25px;">
+        <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+            role="progressbar" style="width: 0%;">0%</div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Citas para mañana: <span id="fechaManana"></span></h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Teléfono</th>
+                        <th>Hora</th>
+                        <th>Último Envío</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPendientes">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// 1. Utilidades y Configuración Inicial
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Asegúrate de tener cargado Moment.js en el layout o arriba de este archivo
+    if (typeof moment !== 'undefined') {
+        document.getElementById('fechaManana').innerText = moment().add(1, 'days').format('DD/MM/YYYY');
+    }
+    cargarCitas();
+});
+
+// 2. Cargar Citas en la Tabla
+async function cargarCitas() {
+    try {
+        const res = await fetch('/notificaciones/pendientes');
+        const citas = await res.json();
+        const tbody = document.getElementById('tablaPendientes');
+        
+        tbody.innerHTML = citas.map(c => {
+            const estado = c.Notificacions.length > 0 ? c.Notificacions[0].estado : 'pendiente';
+            const badgeClass = estado === 'enviado' ? 'bg-success' : (estado === 'error' ? 'bg-danger' : 'bg-secondary');
+            
+            return `
+            <tr>
+                <td><strong>${c.Paciente.nombre}</strong></td>
+                <td>${c.Paciente.telefono}</td>
+                <td>${c.hora.substring(0,5)}</td>
+                <td><span class="badge ${badgeClass}">${estado.toUpperCase()}</span></td>
+                <td class="text-center">
+                    <button class="btn btn-success btn-sm" onclick="enviarMensaje('${c.id}', true)" 
+                        ${estado === 'enviado' ? 'disabled' : ''}>
+                        <i class="bi bi-send"></i> Enviar WhatsApp
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (error) {
+        console.error("Error al cargar citas:", error);
+    }
+}
+
+// 3. Función de Envío Individual (Unificada)
+async function enviarMensaje(citaId, mostrarAlerta = true) {
+    if (mostrarAlerta) {
+        Swal.fire({ 
+            title: 'Enviando...', 
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading() 
+        });
+    }
+
+    try {
+        const res = await fetch(`/notificaciones/enviar/${citaId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (res.ok) {
+            if (mostrarAlerta) {
+                Swal.fire('¡Enviado!', data.message, 'success');
+                cargarCitas();
+            }
+            return true;
+        } else {
+            throw new Error(data.message || 'Error desconocido');
+        }
+    } catch (error) {
+        if (mostrarAlerta) {
+            Swal.fire('Error', error.message, 'error');
+        }
+        return false;
+    }
+}
+
+// 4. Envío Masivo con Retraso
+async function enviarATodos() {
+    const filas = document.querySelectorAll('#tablaPendientes tr');
+    const pendientes = Array.from(filas).filter(fila => {
+        const badge = fila.querySelector('.badge');
+        if(!badge) return false;
+        const estado = badge.innerText.toLowerCase();
+        return estado === 'pendiente' || estado === 'error';
+    });
+
+    if (pendientes.length === 0) {
+        return Swal.fire('Información', 'No hay mensajes pendientes por enviar.', 'info');
+    }
+
+    const confirmar = await Swal.fire({
+        title: `¿Enviar ${pendientes.length} mensajes?`,
+        text: "Se aplicará un retraso de 3 segundos entre cada envío.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, empezar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmar.isConfirmed) return;
+
+    // UI: Bloqueo y Progreso
+    const btnMasivo = document.getElementById('btnEnviarTodos');
+    if(btnMasivo) btnMasivo.disabled = true;
+    
+    const progresoContainer = document.getElementById('progresoContainer');
+    const barra = document.getElementById('barraProgreso');
+    if(progresoContainer) progresoContainer.classList.remove('d-none');
+
+    for (let i = 0; i < pendientes.length; i++) {
+        const fila = pendientes[i];
+        // Extraemos el ID del botón de esa fila
+        const btnEnvio = fila.querySelector('button');
+        const citaId = btnEnvio.getAttribute('onclick').match(/'([^']+)'/)[1];
+        
+        // Actualizar UI
+        const porcentaje = Math.round(((i + 1) / pendientes.length) * 100);
+        if(barra) {
+            barra.style.width = `${porcentaje}%`;
+            barra.innerText = `Enviando ${i + 1} de ${pendientes.length}...`;
+        }
+
+        // Enviamos sin alerta individual (silencioso)
+        await enviarMensaje(citaId, false);
+
+        if (i < pendientes.length - 1) {
+            await delay(3000); 
+        }
+    }
+
+    Swal.fire('Proceso Finalizado', `Se procesaron ${pendientes.length} citas.`, 'success');
+    if(btnMasivo) btnMasivo.disabled = false;
+    if(progresoContainer) progresoContainer.classList.add('d-none');
+    cargarCitas(); 
+}
+
+// Cerrar lista si se hace clic fuera (opcional, si tienes buscador)
+document.addEventListener('click', (e) => {
+    const buscador = document.getElementById('buscadorPaciente');
+    const lista = document.getElementById('listaResultados');
+    if (buscador && lista && !buscador.contains(e.target)) lista.classList.add('d-none');
+});
+</script>

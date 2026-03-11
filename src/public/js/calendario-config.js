@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         
         // --- CONFIGURACIÓN DE TIEMPOS ---
-        slotMinTime: "08:00:00",
+        slotMinTime: "17:00:00",
         slotMaxTime: "24:00:00",
-        // ✅ Define que cada fila represente 30 minutos (Dibuja la línea de 08:30)
+        // ✅ Define que cada fila represente 20 minutos
         slotDuration: '00:20:00',
-        // ✅ Obliga a mostrar la etiqueta de texto en cada fila (08:00, 08:30, 09:00...)
+        // ✅ Obliga a mostrar la etiqueta de texto en cada fila
         slotLabelInterval: '00:40:00',
         
         // ✅ Ajustes de precisión

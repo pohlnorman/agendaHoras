@@ -66,6 +66,7 @@ export const enviarRecordatoriosManana = async () => {
                     estado: 'enviado',
                     citaId: cita.id
                 });
+                await cita.update({ recordatorio_enviado: true });
                 console.log(`Mensaje enviado a ${paciente.nombre}`);
 
             } catch (err) {
